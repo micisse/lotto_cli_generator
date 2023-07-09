@@ -6,7 +6,7 @@ use std::{thread, time::Duration};
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = None)]
 struct Args {
     /// Numbers list
-    #[arg(long = "numbers", required = false)]
+    #[arg(short, long = "numbers", required = false)]
     numbers: Option<String>,
     /// Odds numbers list
     #[arg(long = "odds-numbers", required = false)]
@@ -48,7 +48,7 @@ fn main() {
     };
 
     if arg_mix && arg_numbers.is_none() {
-        panic!("numbers argument is required");
+        panic!("'numbers' argument is required");
     }
 
     'loop_label: for idx in 1..=arg_grid_count {
