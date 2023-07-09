@@ -92,6 +92,7 @@ fn main() {
 
 fn collect_input(input: String) -> Vec<i32> {
     input
+        .trim()
         .split(&[' ', ','][..])
         .collect::<Vec<&str>>()
         .iter()
