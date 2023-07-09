@@ -51,6 +51,11 @@ fn main() {
         panic!("'numbers' argument is required");
     }
 
+    numbers.sort();
+    numbers.dedup();
+    odds_numbers.sort();
+    odds_numbers.dedup();
+
     'loop_label: for idx in 1..=arg_grid_count {
         let i = idx - 1;
         let mut category = 1;
