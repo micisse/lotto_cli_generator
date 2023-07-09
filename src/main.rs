@@ -35,6 +35,9 @@ fn main() {
     if numbers.len() < 5 {
         panic!("'numbers' must contain at least {} numbers", 5);
     }
+    if odds_numbers.len() < 1 {
+        panic!("'odds_numbers' must contain at least {} numbers", 1);
+    }
 
     'numbers: for idx in 1..=grid_count {
         let new_numbers = generate_new_numbers(numbers.clone(), 5);
