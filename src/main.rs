@@ -5,13 +5,16 @@ use std::{thread, time::Duration};
 #[derive(Parser, Debug)]
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = None)]
 struct Args {
-    #[arg(long, required = false)]
-    numbers: Option<String>, // numbers
+    /// Numbers list
+    #[arg(long = "numbers", required = false)]
+    numbers: Option<String>,
 
-    #[arg(long, required = false)]
-    odds_numbers: Option<String>, // odds numbers
+    /// Odds numbers list
+    #[arg(long = "odds-numbers", required = false)]
+    odds_numbers: Option<String>,
 
-    #[arg(long, default_value_t = 10, required = false)]
+    /// Numbers of grid to generate
+    #[arg(long = "grid-count", default_value_t = 10, required = false)]
     grid_count: i32,
 }
 
@@ -20,7 +23,7 @@ fn main() {
     let grid_count = args.grid_count; // Numbers of grid to generate
     let mut combinaisons: Vec<Vec<i32>> = Vec::new();
     let mut odds_combinaisons: Vec<Vec<i32>> = Vec::new();
-    let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid (odds numbers) have 49 numbers
+    let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
 
     let numbers = match args.numbers {
