@@ -3,7 +3,7 @@ use rand::{seq::SliceRandom, thread_rng};
 use std::{thread, time::Duration};
 
 #[derive(Parser, Debug)]
-#[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = None)]
+#[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = "Lotto combination CLI generator. Enter 5 or more numbers and/or 1 or more lucky numbers as arguments or generate default combinations between 1 and 49 with random grids of 5 numbers and 1 lucky number.")]
 struct Args {
     /// Numbers list
     #[arg(short, long = "numbers", required = false)]
