@@ -1,14 +1,14 @@
 use clap::Parser;
 use rand::{seq::SliceRandom, thread_rng};
 
-// https://docs.rs/clap/latest/clap/index.html
 #[derive(Parser, Debug)]
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = None)]
 struct Args {
-    #[arg(long, required = true)]
-    input_1: String, // numéros normales
-    #[arg(long, required = true)]
-    input_2: String, // numéros chances
+    #[arg(long, required = false)]
+    input_1: Option<String>, // numbers
+
+    #[arg(long, required = false)]
+    input_2: Option<String>, // odds numbers
 
     #[arg(long, default_value_t = 10, required = false)]
     grid_count: i32,
@@ -16,12 +16,18 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let grid_count = args.grid_count; // Le nombre de grille à générer
-    let _lotto_price = 2.20; // €
-    let _grid_numbers: Vec<i32> = (1..=49).collect(); // Chaque grille contient 49 nombres
-    let _grid_chance_numbers: Vec<i32> = (1..=10).collect(); // Chaque grille (côté numéro chance) contient 10 nombres
-    let input_1 = collect_input(args.input_1 as String);
-    let input_2 = collect_input(args.input_2 as String);
+    let grid_count = args.grid_count; // Numbers of grid to generate
+    let mut combinaisons: Vec<Vec<i32>> = Vec::new();
+    let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid (odds numbers) have 49 numbers
+    let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
+    let input_1 = match args.input_1 {
+        Some(value) => collect_input(value),
+        None => grid_numbers,
+    };
+    let input_2 = match args.input_2 {
+        Some(value) => collect_input(value),
+        None => grid_odds_numbers,
+    };
 
     if input_1.len() < 5 || input_1.len() > 5 {
         panic!("'input_1' doit obligatoirement contenir {} nombres", 5);
@@ -29,13 +35,16 @@ fn main() {
 
     for idx in 1..=grid_count {
         let numbers = generate_new_numbers(input_1.clone(), 5);
-        let odds_numbers = generate_new_numbers(input_2.clone(), 5);
+        let odds_numbers = generate_new_numbers(input_2.clone(), 1);
 
+        combinaisons.push(numbers.clone()); // Push each combinaison in new vec
         println!(
             "Combinaison {}: Numéros: {:?}, Chance: {:?}",
             idx, numbers, odds_numbers
         );
     }
+
+    println!("Combinaisons {:?}", combinaisons);
 }
 
 fn collect_input(input: String) -> Vec<i32> {
