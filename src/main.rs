@@ -1,14 +1,15 @@
 use clap::Parser;
 use rand::{seq::SliceRandom, thread_rng};
+use std::{thread, time::Duration};
 
 #[derive(Parser, Debug)]
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = None)]
 struct Args {
     #[arg(long, required = false)]
-    input_1: Option<String>, // numbers
+    numbers: Option<String>, // numbers
 
     #[arg(long, required = false)]
-    input_2: Option<String>, // odds numbers
+    odds_numbers: Option<String>, // odds numbers
 
     #[arg(long, default_value_t = 10, required = false)]
     grid_count: i32,
@@ -18,33 +19,44 @@ fn main() {
     let args = Args::parse();
     let grid_count = args.grid_count; // Numbers of grid to generate
     let mut combinaisons: Vec<Vec<i32>> = Vec::new();
+    let mut odds_combinaisons: Vec<Vec<i32>> = Vec::new();
     let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid (odds numbers) have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
-    let input_1 = match args.input_1 {
+
+    let numbers = match args.numbers {
         Some(value) => collect_input(value),
         None => grid_numbers,
     };
-    let input_2 = match args.input_2 {
+    let mut odds_numbers = match args.odds_numbers {
         Some(value) => collect_input(value),
         None => grid_odds_numbers,
     };
 
-    if input_1.len() < 5 || input_1.len() > 5 {
-        panic!("'input_1' doit obligatoirement contenir {} nombres", 5);
+    if numbers.len() < 5 {
+        panic!("'numbers' must contain at least {} numbers", 5);
     }
 
-    for idx in 1..=grid_count {
-        let numbers = generate_new_numbers(input_1.clone(), 5);
-        let odds_numbers = generate_new_numbers(input_2.clone(), 1);
+    'numbers: for idx in 1..=grid_count {
+        let new_numbers = generate_new_numbers(numbers.clone(), 5);
+        let new_odds_numbers = generate_new_numbers(odds_numbers.clone(), 1);
+        let odd_number = new_odds_numbers[0];
+        let index = odds_numbers.iter().position(|&r| r == odd_number).unwrap();
 
-        combinaisons.push(numbers.clone()); // Push each combinaison in new vec
+        if combinaisons.contains(&new_numbers) {
+            println!("\n----|SKiP\n");
+            thread::sleep(Duration::from_millis(1000));
+            main();
+            break 'numbers;
+        }
+
+        combinaisons.push(new_numbers.clone());
+        odds_numbers.remove(index);
+        odds_combinaisons.push(new_odds_numbers.clone());
         println!(
-            "Combinaison {}: Numéros: {:?}, Chance: {:?}",
-            idx, numbers, odds_numbers
+            "Combination n°{} | Numbers: {:?}, Odd number: {}",
+            idx, new_numbers, odd_number
         );
     }
-
-    println!("Combinaisons {:?}", combinaisons);
 }
 
 fn collect_input(input: String) -> Vec<i32> {
