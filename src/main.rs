@@ -67,7 +67,7 @@ fn main() {
 
 fn collect_input(input: String) -> Vec<i32> {
     input
-        .split(" ")
+        .split(&[' ', ','][..])
         .collect::<Vec<&str>>()
         .iter()
         .map(|x| x.parse::<i32>().unwrap())
