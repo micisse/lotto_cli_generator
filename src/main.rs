@@ -1,6 +1,15 @@
+mod utils;
+
+use crate::utils::generate_new_numbers;
+use chrono::{Local, Locale};
 use clap::Parser;
-use rand::{seq::SliceRandom, thread_rng};
-use std::{thread, time::Duration};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+    thread,
+    time::Duration,
+};
+use utils::collect_input;
 
 #[derive(Parser, Debug)]
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = "Lotto combination CLI generator. Enter 5 or more numbers and/or 1 or more lucky numbers as arguments or generate default combinations between 1 and 49 with random grids of 5 numbers and 1 lucky number.")]
@@ -27,7 +36,7 @@ struct Args {
     mix: bool,
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let arg_grid_count = args.grid_count; // Numbers of grid to generate
     let arg_mix: bool = args.mix; // Mix the result
@@ -37,6 +46,15 @@ fn main() {
     let mut odds_combinaisons: Vec<Vec<i32>> = Vec::new();
     let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
+
+    let fmt = "%A %d %B %Y";
+    let locale = Locale::fr_FR;
+    let current_date = Local::now().format_localized(fmt, locale);
+    let current_hour = Local::now().format("%H:%M");
+    let output_path = format!("Tirage du {} à {}.txt", current_date, current_hour);
+    let _created_path = File::create(&output_path)?;
+    // https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
+    let mut output_file = OpenOptions::new().append(true).open(output_path)?;
 
     let mut numbers = match arg_numbers.to_owned() {
         Some(value) => collect_input(value),
@@ -56,6 +74,17 @@ fn main() {
     odds_numbers.sort();
     odds_numbers.dedup();
 
+    if arg_numbers.is_some() {
+        let line_to_file = format!(
+            "╰─ CMD: lotto_generator -n '{}' --odds-numbers '{}' --grid-count {} --mix\n\n",
+            arg_numbers.unwrap(),
+            arg_odds_numbers.unwrap(),
+            arg_grid_count
+        );
+
+        output_file.write(line_to_file.as_bytes())?;
+    }
+
     'loop_label: for idx in 1..=arg_grid_count {
         let i = idx - 1;
         let mut category = 1;
@@ -74,7 +103,7 @@ fn main() {
         if combinaisons.contains(&new_numbers) {
             println!("\n----| SKiP\n");
             thread::sleep(Duration::from_millis(1000));
-            main();
+            let _ = main();
             break 'loop_label;
         }
 
@@ -85,28 +114,16 @@ fn main() {
             odds_numbers.remove(odd_index);
         }
 
-        println!("----| Category {} | Combination n°{}", category, idx);
-        println!("Numbers: {:?}, Odd number: {}\n", new_numbers, odd_number);
+        let line_to_file = format!(
+            "Numbers: {:?}, Odd number: {} | Numéros gagnés: '<À saisir après tirage>' \n\n",
+            new_numbers, odd_number
+        );
+        let line_to_terminal = format!("Numbers: {:?}, Odd number: {}", new_numbers, odd_number);
+
+        println!("----| Category {} | Combination N°{}", category, idx);
+        println!("{}", line_to_terminal);
+        output_file.write(line_to_file.as_bytes())?;
     }
-}
 
-fn collect_input(input: String) -> Vec<i32> {
-    input
-        .trim()
-        .split(&[' ', ','][..])
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<i32>>()
-}
-
-fn generate_new_numbers(input: &Vec<i32>, take_nbr: usize) -> Vec<i32> {
-    let mut cloned_input = input.to_owned();
-
-    cloned_input.shuffle(&mut thread_rng());
-    cloned_input
-        .iter()
-        .take(take_nbr)
-        .map(|x| *x)
-        .collect::<Vec<i32>>()
+    Ok(())
 }
