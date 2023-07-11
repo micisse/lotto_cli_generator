@@ -4,6 +4,7 @@ use crate::utils::generate_new_numbers;
 use chrono::{Local, Locale};
 use clap::Parser;
 use std::{
+    env,
     fs::{File, OpenOptions},
     io::Write,
     thread,
@@ -49,9 +50,13 @@ fn main() -> std::io::Result<()> {
 
     let fmt = "%A %d %B %Y";
     let locale = Locale::fr_FR;
-    let current_date = Local::now().format_localized(fmt, locale);
-    let current_hour = Local::now().format("%H:%M");
-    let output_path = format!("Tirage du {} à {}.txt", current_date, current_hour);
+    let cur_date = Local::now().format_localized(fmt, locale);
+    let cur_hour = Local::now().format("%H:%M");
+    let curr_exe = env::current_exe().unwrap();
+    let full_path = String::from(curr_exe.to_str().unwrap());
+    let path_split: Vec<&str> = full_path.split("/target/release/lotto_generator").collect();
+    let current_dir = path_split[0];
+    let output_path = format!("{}/Tirage du {} à {}.txt", current_dir, cur_date, cur_hour);
     let _created_path = File::create(&output_path)?;
     // https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
     let mut output_file = OpenOptions::new().append(true).open(output_path)?;
