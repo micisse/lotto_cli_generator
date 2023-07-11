@@ -1,15 +1,8 @@
 mod utils;
 
 use crate::utils::generate_new_numbers;
-use chrono::{Local, Locale};
 use clap::Parser;
-use std::{
-    env,
-    fs::{File, OpenOptions},
-    io::Write,
-    thread,
-    time::Duration,
-};
+use std::{thread, time::Duration};
 use utils::collect_input;
 
 #[derive(Parser, Debug)]
@@ -48,18 +41,18 @@ fn main() -> std::io::Result<()> {
     let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
 
-    let fmt = "%A %d %B %Y";
-    let locale = Locale::fr_FR;
-    let cur_date = Local::now().format_localized(fmt, locale);
-    let cur_hour = Local::now().format("%H:%M");
-    let curr_exe = env::current_exe().unwrap();
-    let full_path = String::from(curr_exe.to_str().unwrap());
-    let path_split: Vec<&str> = full_path.split("/target/release/lotto_generator").collect();
-    let current_dir = path_split[0];
-    let output_path = format!("{}/Tirage du {} à {}.txt", current_dir, cur_date, cur_hour);
-    let _created_path = File::create(&output_path)?;
+    // let fmt = "%A %d %B %Y";
+    // let locale = Locale::fr_FR;
+    // let cur_date = Local::now().format_localized(fmt, locale);
+    // let cur_hour = Local::now().format("%H:%M");
+    // let curr_exe = env::current_exe().unwrap();
+    // let full_path = String::from(curr_exe.to_str().unwrap());
+    // let path_split: Vec<&str> = full_path.split("/target/release/lotto_generator").collect();
+    // let current_dir = path_split[0];
+    // let output_path = format!("{}/Tirage du {} à {}.txt", current_dir, cur_date, cur_hour);
+    // let _created_path = File::create(&output_path)?;
     // https://doc.rust-lang.org/std/fs/struct.OpenOptions.html
-    let mut output_file = OpenOptions::new().append(true).open(output_path)?;
+    // let mut output_file = OpenOptions::new().append(true).open(output_path)?;
 
     let mut numbers = match arg_numbers.to_owned() {
         Some(value) => collect_input(value),
@@ -79,25 +72,23 @@ fn main() -> std::io::Result<()> {
     odds_numbers.sort();
     odds_numbers.dedup();
 
-    if arg_numbers.is_some() {
-        let line_to_file = format!(
-            "╰─ CMD: lotto_generator -n '{}' --odds-numbers '{}' --grid-count {} --mix\n\n",
-            arg_numbers.unwrap(),
-            arg_odds_numbers.unwrap(),
-            arg_grid_count
-        );
+    // if arg_numbers.is_some() {
+    //     let line_to_file = format!(
+    //         "╰─ CMD: lotto_generator -n '{}' --odds-numbers '{}' --grid-count {} --mix\n\n",
+    //         arg_numbers.unwrap(),
+    //         arg_odds_numbers.unwrap(),
+    //         arg_grid_count
+    //     );
 
-        output_file.write(line_to_file.as_bytes())?;
-    }
+    //     output_file.write(line_to_file.as_bytes())?;
+    // }
 
     'loop_label: for idx in 1..=arg_grid_count {
         let i = idx - 1;
-        let mut category = 1;
 
         if arg_mix && i >= (arg_grid_count / 2) {
             numbers = grid_numbers.clone();
             odds_numbers = grid_odds_numbers.clone();
-            category += 1;
         };
 
         let new_numbers = generate_new_numbers(&numbers, 5);
@@ -119,15 +110,14 @@ fn main() -> std::io::Result<()> {
             odds_numbers.remove(odd_index);
         }
 
-        let line_to_file = format!(
-            "Numbers: {:?}, Odd number: {} | Numéros gagnés: '<À saisir après tirage>' \n\n",
-            new_numbers, odd_number
-        );
+        // let line_to_file = format!(
+        //     "Numbers: {:?}, Odd number: {} | Numéros gagnés: '<À saisir après tirage>' \n\n",
+        //     new_numbers, odd_number
+        // );
         let line_to_terminal = format!("Numbers: {:?}, Odd number: {}", new_numbers, odd_number);
 
-        println!("----| Category {} | Combination N°{}", category, idx);
-        println!("{}", line_to_terminal);
-        output_file.write(line_to_file.as_bytes())?;
+        println!("\n----| Combination N°{} = {}", idx, line_to_terminal);
+        // output_file.write(line_to_file.as_bytes())?;
     }
 
     Ok(())
