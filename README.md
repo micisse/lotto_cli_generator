@@ -3,7 +3,7 @@
 ### PREREQUISITES
 
 - **Rust**: *1.70.0* (with cargo)
-- **Rust Analyzer (for dev)**: *0.3.1583-standalone or ...*
+- **Rust Analyzer (dev & optional)**: *0.3.1583-standalone or ...*
 
 ### ABOUT
 

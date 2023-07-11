@@ -14,6 +14,9 @@ struct Args {
     /// Odds numbers list
     #[arg(long = "odds-numbers", required = false)]
     odds_numbers: Option<String>,
+    /// Grid price
+    #[arg(long = "price", required = false)]
+    price: Option<f32>,
     /// Numbers of grid to generate
     #[arg(long = "grid-count", default_value_t = 10, required = false)]
     grid_count: i32,
@@ -36,10 +39,12 @@ fn main() -> std::io::Result<()> {
     let arg_mix: bool = args.mix; // Mix the result
     let arg_numbers = args.numbers;
     let arg_odds_numbers = args.odds_numbers;
+    let arg_price = args.price;
     let mut combinaisons: Vec<Vec<i32>> = Vec::new();
     let mut odds_combinaisons: Vec<Vec<i32>> = Vec::new();
     let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
+    let price = arg_price.unwrap_or(2.20);
 
     // let fmt = "%A %d %B %Y";
     // let locale = Locale::fr_FR;
@@ -122,5 +127,9 @@ fn main() -> std::io::Result<()> {
         // output_file.write(line_to_file.as_bytes())?;
     }
 
+    println!(
+        "\n----| Total Price = {}€\n",
+        (arg_grid_count as f32) * price
+    );
     Ok(())
 }
