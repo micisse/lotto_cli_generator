@@ -99,7 +99,9 @@ fn main() -> std::io::Result<()> {
         if combinaisons.contains(&new_numbers) {
             println!("\n----| SKiP\n");
             thread::sleep(Duration::from_millis(1000));
+
             let _ = main();
+
             break 'loop_label;
         }
 
