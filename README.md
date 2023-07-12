@@ -20,11 +20,11 @@
 #### Dev mode
 
 ```sh
-cargo run -- -n "6 10 19 32 48 17 33 39 41" --odds-numbers "10 4 9 5" --grid-count 4 --mix
+cargo run -- -n "6 10 19 32 48 17 33 39 41" --odds-numbers "10 4 9 5" --grid-count 4 --mix "false false false true"
 ```
 
 ```sh
-cargo run -- --numbers "<numbers list>" --odds-numbers "<odds number list>" --grid-count <GRID_COUNT> --mix
+cargo run -- --numbers "<NUMBERS>" --odds-numbers "<ODDS_NUMBER>" --grid-count <GRID_COUNT> [--mix "<BOOL> <BOOL> <BOOL> <BOOL>"]
 ```
 
 #### Release mode
@@ -33,5 +33,5 @@ cargo run -- --numbers "<numbers list>" --odds-numbers "<odds number list>" --gr
 cargo build --release
 ```
 ```sh
-./target/release/lotto_cli_generator --numbers "<numbers list>" --odds-numbers "<odds number list>" --grid-count <GRID_COUNT> --mix <mix is BOOLEAN, true if present, false if not>
+./target/release/lotto_cli_generator --numbers "<NUMBERS>" --odds-numbers "<ODDS_NUMBER>" --grid-count <GRID_COUNT> [--mix "<BOOL> <BOOL> <BOOL> <BOOL>"]
 ```

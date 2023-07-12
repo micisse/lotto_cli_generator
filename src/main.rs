@@ -1,9 +1,8 @@
 mod utils;
 
-use crate::utils::generate_new_numbers;
+use crate::utils::{generate_new_numbers, string_to_vec};
 use clap::Parser;
 use std::{thread, time::Duration};
-use utils::collect_input;
 
 #[derive(Parser, Debug)]
 #[command(author = "Morel Cissé", version = "1.0.0", about = None, long_about = "Lotto combination CLI generator. Enter 5 or more numbers and/or 1 or more lucky numbers as arguments or generate default combinations between 1 and 49 with random grids of 5 numbers and 1 lucky number.")]
@@ -14,13 +13,10 @@ struct Args {
     /// Odds numbers list
     #[arg(long = "odds-numbers", required = false)]
     odds_numbers: Option<String>,
-    /// Grid price
-    #[arg(long = "price", required = false)]
-    price: Option<f32>,
     /// Numbers of grid to generate
     #[arg(long = "grid-count", default_value_t = 10, required = false)]
     grid_count: i32,
-    /// Type of combination generation
+    /// Mix result per grid
     ///
     /// **false**: Generate from argument "numbers" pass as parameter
     ///
@@ -29,22 +25,25 @@ struct Args {
     /// Generate from the "numbers" argument and the numbers included in each grid (1..=49) by dividing the number
     /// of grids (grid_count) by 2. If 10, then 10 / 2 = 5, so 5 grids with combinations based on
     /// "numbers" argument and another 5 grids with the numbers in each grid.
-    #[arg(long = "mix", default_value_t = false, required = false)]
-    mix: bool,
+    #[arg(long = "mix", required = false)]
+    mix: Option<String>,
 }
 
-fn main() -> std::io::Result<()> {
+fn main() {
+    // fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let arg_grid_count = args.grid_count; // Numbers of grid to generate
-    let arg_mix: bool = args.mix; // Mix the result
+    let arg_mix: Vec<bool> = string_to_vec(args.mix)
+        .iter()
+        .map(|x| x.parse::<bool>().unwrap())
+        .collect::<Vec<bool>>();
     let arg_numbers = args.numbers;
     let arg_odds_numbers = args.odds_numbers;
-    let arg_price = args.price;
     let mut combinaisons: Vec<Vec<i32>> = Vec::new();
     let mut odds_combinaisons: Vec<Vec<i32>> = Vec::new();
     let grid_numbers: Vec<i32> = (1..=49).collect(); // Each grid have 49 numbers
     let grid_odds_numbers: Vec<i32> = (1..=10).collect(); // Each grid (odds numbers) have 10 numbers
-    let price = arg_price.unwrap_or(2.20);
+    let price = 2.20;
 
     // let fmt = "%A %d %B %Y";
     // let locale = Locale::fr_FR;
@@ -60,23 +59,24 @@ fn main() -> std::io::Result<()> {
     // let mut output_file = OpenOptions::new().append(true).open(output_path)?;
 
     let mut numbers = match arg_numbers.to_owned() {
-        Some(value) => collect_input(value),
+        Some(value) => string_to_vec(Some(value))
+            .iter()
+            .map(|x| x.parse::<i32>().unwrap())
+            .collect(),
         None => grid_numbers.to_owned(),
     };
     let mut odds_numbers = match arg_odds_numbers.to_owned() {
-        Some(value) => collect_input(value),
+        Some(value) => string_to_vec(Some(value))
+            .iter()
+            .map(|x| x.parse::<i32>().unwrap())
+            .collect(),
         None => grid_odds_numbers.to_owned(),
     };
-
-    if arg_mix && arg_numbers.is_none() {
-        panic!("'numbers' argument is required");
-    }
 
     numbers.sort();
     numbers.dedup();
     odds_numbers.sort();
     odds_numbers.dedup();
-
     // if arg_numbers.is_some() {
     //     let line_to_file = format!(
     //         "╰─ CMD: lotto_generator -n '{}' --odds-numbers '{}' --grid-count {} --mix\n\n",
@@ -87,11 +87,26 @@ fn main() -> std::io::Result<()> {
 
     //     output_file.write(line_to_file.as_bytes())?;
     // }
-
     'loop_label: for idx in 1..=arg_grid_count {
         let i = idx - 1;
+        let new_idx = i as usize;
+        let mix = if arg_mix.get(new_idx).is_some() {
+            arg_mix[new_idx]
+        } else {
+            false
+        };
+        // If mix argument is true then mix the result in dividing the number of grids
+        // by 2. if 10, then 10 / 2 = 5, so 5 grids with combinations based on "numbers" argument and another 5
+        // grids with the numbers in each grid (1..=70).
+        if mix && arg_numbers.is_none() {
+            panic!("'numbers' argument is required");
+        }
 
-        if arg_mix && i >= (arg_grid_count / 2) {
+        if arg_mix.len() > arg_grid_count.try_into().unwrap() {
+            panic!("'mix' argument must be less than or equal to 'grid-count'");
+        }
+
+        if mix && i >= (arg_grid_count / 2) {
             numbers = grid_numbers.clone();
             odds_numbers = grid_odds_numbers.clone();
         };
@@ -104,9 +119,7 @@ fn main() -> std::io::Result<()> {
         if combinaisons.contains(&new_numbers) {
             println!("\n----| SKiP\n");
             thread::sleep(Duration::from_millis(1000));
-
-            let _ = main();
-
+            main();
             break 'loop_label;
         }
 
@@ -116,7 +129,6 @@ fn main() -> std::io::Result<()> {
         if odds_numbers.len() > 1 {
             odds_numbers.remove(odd_index);
         }
-
         // let line_to_file = format!(
         //     "Numbers: {:?}, Odd number: {} | Numéros gagnés: '<À saisir après tirage>' \n\n",
         //     new_numbers, odd_number
@@ -131,5 +143,5 @@ fn main() -> std::io::Result<()> {
         "\n----| Total Price = {}€\n",
         (arg_grid_count as f32) * price
     );
-    Ok(())
+    // Ok(())
 }

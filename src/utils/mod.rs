@@ -1,13 +1,18 @@
 use rand::{seq::SliceRandom, thread_rng};
 
-pub fn collect_input(input: String) -> Vec<i32> {
-    input
-        .trim()
-        .split(&[' ', ','][..])
-        .collect::<Vec<&str>>()
-        .iter()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<i32>>()
+pub fn string_to_vec(input: Option<String>) -> Vec<String> {
+    if input.is_some() {
+        let value = input.unwrap();
+
+        value
+            .trim()
+            .split(&[' ', ','][..])
+            .filter(|x| x.parse::<String>().is_ok() && x != &"0" && x != &"")
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>()
+    } else {
+        vec![]
+    }
 }
 
 pub fn generate_new_numbers(input: &Vec<i32>, take_nbr: usize) -> Vec<i32> {
