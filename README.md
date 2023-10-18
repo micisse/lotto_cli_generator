@@ -2,8 +2,9 @@
 
 ### PREREQUISITES
 
-- **Rust**: *1.70.0* (with cargo)
-- **Rust Analyzer (dev & optional)**: *0.3.1583-standalone or ...*
+- **rust**: *1.73.0* (with cargo)
+- **cargo**: *1.73.0*
+- **rust-analyzer (dev & optional)**: *0.3.1697-standalone or ...*
 
 ### ABOUT
 
